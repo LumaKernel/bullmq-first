@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  queue:
+    image: node:14-alpine
+    volumes:
+      - ".:/usr/local/src"
+    working_dir: "/usr/local/src"
+    command: sh -ce "yarn && yarn queue:dev"
+  worker:
+    image: node:14-alpine
+    depends_on:
+      - queue
+    volumes:
+      - ".:/usr/local/src"
+    working_dir: "/usr/local/src"
+    command: yarn worker:dev
+  watcher:
+    image: node:14-alpine
+    depends_on:
+      - queue
+    volumes:
+      - ".:/usr/local/src"
+    working_dir: "/usr/local/src"
+    command: yarn watcher:dev
+  scheduler:
+    image: node:14-alpine
+    depends_on:
+      - queue
+    volumes:
+      - ".:/usr/local/src"
+    working_dir: "/usr/local/src"
+    command: yarn scheduler:dev
+  redis:
+    image: redis:6-alpine
+  redis-ui:
+    image: patrikx3/p3x-redis-ui:latest
+    ports:
+        - 17843:7843
+    volumes:
+        - redis-ui-settings:/settings
+
+volumes:
+  redis-ui-settings:
